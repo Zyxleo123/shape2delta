@@ -48,12 +48,16 @@ Raw data is staged on scratch (`$S2D_DATA`); the repo holds only code + results.
 | **E4** | full-backbone ablation (flow/transport), MD loss intact | GPU | deferred (budget; E1/E3 null → low priority) |
 | **E5** | specificity negative control on Replogle CRISPRi | CPU | **done** — both null; no identity leakage |
 | **E6** | mechanism-level sanity scatter (flexibility vs response) | CPU | **done — null** (partial 0.007) |
-| **E7** | pocket-centric *matched* ablation (ligand-defined pocket; T1 = AF pocket, T2 = T1 ⊕ its motion over PDB conformers): ridge + held-out-target kNN + partial Mantel | CPU | **done — null** (169 targets; ridge T2−T1 ≤ 0; kNN −0.000 [−0.018,+0.017]; Mantel r −0.006, p 0.83) |
+| **E7** | pocket-centric *matched* ablation (ligand-defined pocket; T1 = AF pocket, T2 = T1 ⊕ its motion over PDB conformers): ridge + held-out-target kNN + partial Mantel | CPU | **done — null** (282 targets, all classes; ridge T2−T1 ≤ 0; kNN −0.021 [−0.035,−0.007] = motion *hurts*; Mantel r −0.001, p 0.96) |
+| **E8** | real MD ensembles (ATLAS + mdCATH frames) as the T2 source, same pocket/T1/summariser; pure-Python .xtc decoder (RMSF r≥0.999 vs ATLAS) | CPU | **done — null** (20 targets w/ MD covering the pocket; nothing clears the 0.01 floor; MD & PDB flexibility agree but neither predicts Δ) |
+| **E9** | single-cell readout (sci-Plex3): matched pocket tiers on pseudobulk Δ **and** on single-cell distribution readouts (E-dist, responder-frac, dispersion, bimodality, viability) | CPU | **done — null** (34 targets, 2247 conditions; ridge T2−T1 ≤ 0; kNN −0.001 [−0.044,+0.040]; Mantel r −0.014; single-cell screen nothing survives BH) |
 
 **Bottom line:** ensemble (T2) features add no transferable signal over identity/
-static here (E1/E3/E5/E6 null; E2 confirms the gap exists), and the pocket-centric
-matched re-test (E7) is null too. Figures in
-`results/figures/`. See `results/SUMMARY.md` for the honest headline + caveats.
+static here. The headline null (E1/E3/E5/E6; E2 confirms the gap exists) survives
+every lever that could have rescued it: the spec's matched pocket descriptor (E7),
+real molecular dynamics instead of PDB conformers (E8), and single-cell readout
+instead of bulk (E9) — all null. Figures in `results/figures/`. See
+`results/SUMMARY.md` for the honest headline + caveats.
 
 ## Layout
 ```

@@ -169,11 +169,16 @@ def knn_transfer(D, spaces, k=K_NN, n_repeat=N_REPEAT, seed=0):
         return {"mean": float(x.mean()), "lo": float(lo), "hi": float(hi),
                 "excludes_zero": bool(lo > 0 or hi < 0)}
     summ = {key: ci(v) for key, v in per_t.items()}
+    # Standard T0/T1/T2 gaps, only for whichever of those named spaces exist
+    # (callers with differently-named spaces, e.g. E8's T2_MD, add their own).
     gaps = {}
     for sc in ("raw", "cen"):
-        gaps[f"{sc}_T2_minus_T1"] = ci(per_t[f"{sc}_T2"] - per_t[f"{sc}_T1"])
-        gaps[f"{sc}_T1_minus_T0"] = ci(per_t[f"{sc}_T1"] - per_t[f"{sc}_T0"])
-        gaps[f"{sc}_T2_minus_perm"] = ci(per_t[f"{sc}_T2"] - per_t[f"{sc}_T2_permuted"])
+        def g(a, c):
+            if f"{sc}_{a}" in per_t and f"{sc}_{c}" in per_t:
+                gaps[f"{sc}_{a}_minus_{c}"] = ci(per_t[f"{sc}_{a}"] - per_t[f"{sc}_{c}"])
+        g("T2", "T1"); g("T1", "T0"); g("T2", "T2_permuted")
+        if f"{sc}_T2_permuted" in per_t:                 # rename for the summary line
+            gaps[f"{sc}_T2_minus_perm"] = gaps.get(f"{sc}_T2_minus_T2_permuted")
     return {"k": k, "n_repeat": n_repeat, "n_targets": n, "scores": summ, "gaps": gaps}, per_t
 
 

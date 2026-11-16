@@ -297,8 +297,72 @@ def fig_e7():
         _save(fig, "E7_mantel_scatter")
 
 
+# ------------------------------------------------- E8 MD / E9 single-cell ----
+def _forest(rows, title, stem, floor=0.01, xlabel="gap in Δ-Pearson  (95% CI)"):
+    """Horizontal CI forest, shared by E8 and E9. rows = [(label, ci, color)]."""
+    plt = _style()
+    fig, ax = plt.subplots(figsize=(10.5, 0.7 * len(rows) + 2.0))
+    for i, (lab, c, col) in enumerate(rows[::-1]):
+        ax.errorbar(c["mean"], i, xerr=[[c["mean"] - c["lo"]], [c["hi"] - c["mean"]]],
+                    fmt="o", ms=10, color=col, ecolor=col, elinewidth=2.4, capsize=5, zorder=3)
+    ax.set_yticks(range(len(rows))); ax.set_yticklabels([r[0] for r in rows[::-1]])
+    ax.axvline(0, color=INK, lw=1.4)
+    for s in (-floor, floor):
+        ax.axvline(s, color=MUTED, lw=1.2, ls="--")
+    ax.set_xlabel(xlabel + "; dashed = effect floor")
+    ax.set_title(title)
+    ax.grid(axis="y", visible=False)
+    _save(fig, stem)
+
+
+def fig_e8():
+    r = _load("E8_md.json")
+    if not r:
+        return
+    rg, kg = r["ridge"]["gaps"], r["knn"]["gaps"]
+    sp = ["target", "scaffold", "cell", "random"]
+    rows = [(f"ridge · {s}  (MD − T1)", rg[s]["T2MD_minus_T1"], OI["vermillion"]) for s in sp]
+    rows += [("kNN target  (MD − T1)", kg["cen_T2_MD_minus_T1"], OI["blue"]),
+             ("kNN target  (MD − PDB)", kg["cen_T2_MD_minus_T2_PDB"], OI["green"]),
+             ("kNN target  (MD − perm)", kg["cen_T2_MD_minus_T2_MD_permuted"], OI["black"])]
+    _forest(rows, f"E8 — real MD ensembles add nothing ({r['n_targets_md']} targets)",
+            "E8_gaps", floor=r["verdict"]["effect_floor"])
+
+
+def fig_e9():
+    r = _load("E9_sciplex.json")
+    if not r:
+        return
+    plt = _style()
+    rg, kg = r["ridge"]["gaps"], r["knn"]["gaps"]
+    sp = ["target", "scaffold", "cell", "random"]
+    rows = [(f"ridge · {s}  (T2 − T1)", rg[s]["T2_minus_T1"], OI["vermillion"]) for s in sp]
+    rows += [("kNN target  (T2 − T1)", kg["cen_T2_minus_T1"], OI["blue"]),
+             ("kNN target  (T2 − perm)", kg["cen_T2_minus_perm"], OI["black"])]
+    _forest(rows, f"E9 — sci-Plex3 single-cell: no ensemble gain",
+            "E9_gaps", floor=r["verdict"]["effect_floor"])
+
+    # single-cell screen: best |partial rho| per readout, BH q as colour
+    sc = r.get("singlecell_screen_top") or []
+    if sc:
+        import pandas as pd
+        d = pd.DataFrame(sc)
+        best = d.loc[d.groupby("readout")["p"].idxmin()].sort_values("partial_rho")
+        fig, ax = plt.subplots(figsize=(9.5, 5.6))
+        cols = [OI["vermillion"] if q < 0.05 else OI["grey"] for q in best["q_bh"]]
+        ax.barh(range(len(best)), best["partial_rho"], color=cols, zorder=3)
+        ax.set_yticks(range(len(best)))
+        ax.set_yticklabels([f"{ro}\n← {fe}" for ro, fe in zip(best["readout"], best["feature"])],
+                           fontsize=11)
+        ax.axvline(0, color=INK, lw=1.4)
+        ax.set_xlabel("partial Spearman ρ  (feature vs readout | dose, cell)")
+        ax.set_title("E9 — single-cell readouts vs pocket motion\n(grey = n.s. after BH; across targets)")
+        ax.grid(axis="y", visible=False)
+        _save(fig, "E9_singlecell_screen")
+
+
 ALL = {"e0": fig_e0, "e1": fig_e1, "e2": fig_e2, "e3": fig_e3, "e5": fig_e5, "e6": fig_e6,
-       "e7": fig_e7}
+       "e7": fig_e7, "e8": fig_e8, "e9": fig_e9}
 
 
 def build(which=None):

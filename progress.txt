@@ -1,32 +1,49 @@
-Where things stand (2026-11-15, evening)
+Where things stand (2026-11-15, late)
 
-E7 — pocket-centric matched ablation — is DONE, and it is NULL.
+Done: E7 (matched pocket, broadened), E8 (real MD), E9 (single-cell). ALL NULL.
+The conformational-ensemble thesis has now survived every lever we had and still
+carries no transferable signal for transcriptional drug-response prediction.
 
-What was blocking it: the _fpocket wrapper wrote an EMPTY PDB. Bio.PDB.PDBIO.set_structure()
-wraps a *copy* of a Model, so the id()-based residue filter rejected every residue; fpocket
-printed "contains no atoms" and the wrapper silently returned 0 pockets (every fp_* column = 0).
-Fixed in features/pocket_ensemble.py: the PDB is now hand-written with residues numbered by
-UniProt index; an fpocket failure now raises and is counted per conformer (NaN, not 0); per-
-conformer rows are saved with a holo flag (pocket_conformers.csv); an apo-vs-holo cryptic flag
-(x_cryptic_apo_holo) was added alongside the AF-vs-experiment one. The broken-run shards were
-moved to $S2D_FEATURES/pocket_ensemble/shards_broken_fpocket_20261115/.
+E7 (re-run on the broadened set): 282 targets, ALL protein classes (was enzyme-
+only 169), with the fpocket wrapper bug fixed (Bio.PDB PDBIO.set_structure copies
+the Model -> id()-based Select wrote an EMPTY pdb -> every fp_* column was 0; now
+PDBs are hand-written, UniProt-numbered; 4137/4137 conformer fpocket runs OK). ESM
+was also re-embedded over ALL targets (the old run missed 86 that lacked embeddings
+at the time). Result: ridge T2-T1 <=0 every split; kNN centred -0.021[-0.035,-0.007]*
+(motion HURTS); Mantel r -0.001 p .96. Enzyme-only v1 kept as results/*_enzymes_v1.*.
 
-Jobs (lov4, chained afterok): 111540 profile (40 shards, ~10 min) -> 111541 gather -> 111542 E7.
-Features: 241 targets profiled, 239 ok, 169 usable (>=3 conformers; 163 ligand-defined pockets,
-6 AF-fpocket fallback), median 12 conformers, 2568/2568 conformer fpocket runs OK, 96% of static
-AF pockets overlap the ligand site. Cryptic: AF-vs-exp 48% (inflated by induced fit — holo chains
-are ligand-stripped), apo-vs-holo 30% of the 93 targets that have both.
+E8 (real MD): src/shape2delta/features/md_ensemble.py streams ATLAS + mdCATH
+trajectories, keeps ~300 sampled frames/entry, computes the SAME pocket descriptor
+(pocket_ensemble.t2_summary, shared) over MD frames. Pure-Python .xtc decoder in
+src/shape2delta/data/xtc.py (xdrfile port; validated vs ATLAS RMSF r>=0.999).
+KEY LIMIT: only 20 LINCS targets have an MD entry resolving >=60% of the drug
+pocket -- mdCATH CATH domains usually miss the ligand site (coverage bimodal: 0 or
+~1). 11 ATLAS + 9 mdCATH. Underpowered. No test clears the 0.01 floor: ridge
+MD-T1 target +0.007* (sub-floor; shuffled-target control within noise); kNN CIs all
+include 0. MD vs PDB flexibility AGREE (fp_drug_cv rho .54, fp_vol_cv .49, rmsf .46)
+-- the two ensembles measure a shared quantity -- yet neither predicts Delta.
+experiments/e8_md.py.
 
-E7 results (results/E7_pocket.json, SUMMARY.md, figures E7_ablation / E7_gaps / E7_mantel_scatter):
-  (a) ridge, 164 targets / 5691 conditions: T2-T1 Δρ target -0.004*, scaffold -0.001*, cell +0.000,
-      random -0.000 -> motion never helps (slightly hurts on held-out target).
-  (b) held-out-target kNN (k=10, 10x5-fold), centred Δρ: T2-T1 -0.000 [-0.018,+0.017];
-      T2-perm +0.014 [-0.006,+0.036]; motion-only 0.011 (CI incl 0).
-  (c) partial Mantel motion vs Δ-deviation | ESM + static pocket: r = -0.006, p = 0.83.
-  Feature screen vs response strength: nothing survives BH (best q=0.10, pocket-opening
-  features, mildly count-confounded rho 0.12-0.24 with n_conformers).
+E9 (sci-Plex3 single-cell): data in $S2D_FEATURES/sciplex3 (delta.npy 2247x2722,
+cond_meta.csv with single-cell readouts, cell_pcs.npz, compound_targets.csv).
+src/shape2delta/data/sciplex.py (2-pass: HVG+PCA on 120k-cell subsample, then
+per-condition pseudobulk Delta vs same-cell-line vehicle + per-cell PCA scores +
+E-distance/responder-frac/dispersion/bimodality/viability). 56 single-target
+compounds -> 39 targets, 3 lines, 4 doses. experiments/e9_sciplex.py: ridge +
+held-out-target kNN + partial Mantel + a single-cell screen. ALL NULL: ridge T2-T1
+<=0; kNN centred -0.001[-0.044,+0.040]; Mantel r -0.014 p .89. Single-cell screen
+CORRECTLY aggregated to TARGET level (condition-level was pseudoreplication: n
+inflated ~10x, gave spurious q=2e-11; target-level min q=0.57). Best raw hit
+e_fp_vol_open -> frac_responders rho .55 p .005 but q .57. NB static DOES beat
+identity on single-cell kNN (T1-T0 +0.059*), but motion adds nothing on top.
 
-Bottom line: replacing the coarse global-RMSF T2 with the spec's pocket-centric, matched-extractor
-T2 does not change the answer. The remaining untested levers are (1) real MD / enhanced-sampling
-ensembles instead of PDB conformers (mdCATH/ATLAS for the ~73 MD-covered targets), (2) single-cell
-readout (sci-Plex3) instead of LINCS bulk, (3) the E4 nonlinear flow backbone.
+Infra added this session: fetch_sciplex3.sh, md_fetch/md_profile/pocket_manifest/
+fetch_structures/sciplex_build .sbatch; submit.sh now accepts afterok:a:b:c; fetch
+scripts take the broadened target set; compute nodes HAVE internet (probed, job
+111561) so MD download+extract runs as a SLURM job. Figures: viz/figures.py fig_e7
+(broadened), fig_e8, fig_e9 (+ single-cell screen bar). All in results/figures/.
+
+Remaining lever (only one not well-powered): a larger MD-WITH-POCKET set -- e.g.
+simulate the ~250 druggable targets that lack pocket-covering MD, or mine GPCRmd/
+other MD banks. E4 flow backbone still deprioritised (no linear/neighbour signal
+for it to find). Otherwise: write up the clean, multiply-confirmed negative result.
