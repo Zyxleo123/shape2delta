@@ -1,0 +1,14 @@
+{
+  "experiment": "E1_mantel",
+  "atlas": "LINCS_L1000",
+  "generated": "2026-11-15T22:57:20.137248+00:00",
+  "n_targets": 337,
+  "n_pairs": 56616,
+  "n_perm": 2000,
+  "r_ensemble_vs_delta_simple": 0.010185487707141517,
+  "r_ensemble_vs_delta_partial_given_esm": 0.008482918959746105,
+  "r_esm_vs_delta_simple": 0.04341354652645137,
+  "r_struct_vs_delta_partial_given_esm": 0.011335627812043223,
+  "mantel_p_partial": 0.15892053973013492,
+  "significant": false
+}

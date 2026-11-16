@@ -1,0 +1,92 @@
+{
+  "experiment": "E0_coverage",
+  "atlas": "LINCS_L1000",
+  "generated": "2026-11-15T21:44:04.870551+00:00",
+  "config": {
+    "MIN_T2_TARGETS": 40,
+    "MIN_PDB_CHAINS": 5
+  },
+  "join_counts": {
+    "siginfo_rows": 1201944,
+    "trt_cp_sigs": 720216,
+    "qc_pass_sigs": 510270,
+    "compounds_with_measured_sig": 30528,
+    "compounds_in_compoundinfo_with_sig": 35391,
+    "dropped_no_target_annotation": 26748,
+    "dropped_multi_target": 5666,
+    "single_target_compounds": 2977,
+    "single_target_distinct_genes": 689,
+    "compounds_gene_mapped": 2977,
+    "compounds_unmapped_gene": 0,
+    "distinct_targets_mapped": 688
+  },
+  "gene_map_status_counts": {
+    "primary": 2951,
+    "synonym": 19,
+    "primary_multi": 7
+  },
+  "targets_per_tier_all": {
+    "T0_identity": 688,
+    "T1_afdb": 688,
+    "T2_md_atlas": 22,
+    "T2_md_mdcath": 57,
+    "T2_md_any": 73,
+    "T2_empirical": 541,
+    "T2_any": 546,
+    "n_targets": 688
+  },
+  "targets_per_tier_enzyme": {
+    "T0_identity": 364,
+    "T1_afdb": 364,
+    "T2_md_atlas": 19,
+    "T2_md_mdcath": 37,
+    "T2_md_any": 51,
+    "T2_empirical": 294,
+    "T2_any": 297,
+    "n_targets": 364
+  },
+  "targets_per_tier_drh_only": {
+    "T0_identity": 502,
+    "T1_afdb": 502,
+    "T2_md_atlas": 18,
+    "T2_md_mdcath": 49,
+    "T2_md_any": 62,
+    "T2_empirical": 406,
+    "T2_any": 409,
+    "n_targets": 502
+  },
+  "targets_per_tier_drh_only_enzyme": {
+    "T0_identity": 261,
+    "T1_afdb": 261,
+    "T2_md_atlas": 15,
+    "T2_md_mdcath": 32,
+    "T2_md_any": 43,
+    "T2_empirical": 216,
+    "T2_any": 217,
+    "n_targets": 261
+  },
+  "target_source_counts": {
+    "drh": 1840,
+    "lincs": 1137
+  },
+  "compound_coverage": {
+    "compounds_T0": 2977,
+    "compounds_T1": 2977,
+    "compounds_T2_md": 340,
+    "compounds_T2_empirical": 2569,
+    "compounds_T2_any": 2574,
+    "compounds_T2_enzyme": 1144
+  },
+  "gate": {
+    "t2_md_targets": 73,
+    "t2_empirical_targets": 541,
+    "min_required": 40,
+    "chosen_T2_source": "MD",
+    "effective_T2_targets": 73,
+    "effective_T2_enzyme_targets": 51
+  },
+  "ensemble_source_sizes": {
+    "atlas_uniprots": 1542,
+    "mdcath_uniprots": 4632
+  }
+}

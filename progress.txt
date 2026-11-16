@@ -1,0 +1,32 @@
+Where things stand (2026-11-15, evening)
+
+E7 — pocket-centric matched ablation — is DONE, and it is NULL.
+
+What was blocking it: the _fpocket wrapper wrote an EMPTY PDB. Bio.PDB.PDBIO.set_structure()
+wraps a *copy* of a Model, so the id()-based residue filter rejected every residue; fpocket
+printed "contains no atoms" and the wrapper silently returned 0 pockets (every fp_* column = 0).
+Fixed in features/pocket_ensemble.py: the PDB is now hand-written with residues numbered by
+UniProt index; an fpocket failure now raises and is counted per conformer (NaN, not 0); per-
+conformer rows are saved with a holo flag (pocket_conformers.csv); an apo-vs-holo cryptic flag
+(x_cryptic_apo_holo) was added alongside the AF-vs-experiment one. The broken-run shards were
+moved to $S2D_FEATURES/pocket_ensemble/shards_broken_fpocket_20261115/.
+
+Jobs (lov4, chained afterok): 111540 profile (40 shards, ~10 min) -> 111541 gather -> 111542 E7.
+Features: 241 targets profiled, 239 ok, 169 usable (>=3 conformers; 163 ligand-defined pockets,
+6 AF-fpocket fallback), median 12 conformers, 2568/2568 conformer fpocket runs OK, 96% of static
+AF pockets overlap the ligand site. Cryptic: AF-vs-exp 48% (inflated by induced fit — holo chains
+are ligand-stripped), apo-vs-holo 30% of the 93 targets that have both.
+
+E7 results (results/E7_pocket.json, SUMMARY.md, figures E7_ablation / E7_gaps / E7_mantel_scatter):
+  (a) ridge, 164 targets / 5691 conditions: T2-T1 Δρ target -0.004*, scaffold -0.001*, cell +0.000,
+      random -0.000 -> motion never helps (slightly hurts on held-out target).
+  (b) held-out-target kNN (k=10, 10x5-fold), centred Δρ: T2-T1 -0.000 [-0.018,+0.017];
+      T2-perm +0.014 [-0.006,+0.036]; motion-only 0.011 (CI incl 0).
+  (c) partial Mantel motion vs Δ-deviation | ESM + static pocket: r = -0.006, p = 0.83.
+  Feature screen vs response strength: nothing survives BH (best q=0.10, pocket-opening
+  features, mildly count-confounded rho 0.12-0.24 with n_conformers).
+
+Bottom line: replacing the coarse global-RMSF T2 with the spec's pocket-centric, matched-extractor
+T2 does not change the answer. The remaining untested levers are (1) real MD / enhanced-sampling
+ensembles instead of PDB conformers (mdCATH/ATLAS for the ~73 MD-covered targets), (2) single-cell
+readout (sci-Plex3) instead of LINCS bulk, (3) the E4 nonlinear flow backbone.

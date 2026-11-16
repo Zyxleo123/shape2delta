@@ -1,0 +1,10 @@
+{
+  "experiment": "E6_mechanism",
+  "atlas": "LINCS_L1000",
+  "generated": "2026-11-15T22:56:56.133801+00:00",
+  "n_targets": 349,
+  "spearman_flex_vs_nde": 0.011494661720829238,
+  "partial_flex_vs_nde_given_dose_size": 0.0074296287350758185,
+  "spearman_flex_vs_entropy": 0.04777488005652599,
+  "partial_flex_vs_entropy_given_dose_size": 0.025603612309321573
+}

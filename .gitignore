@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+# per-run artefacts (job logs, auto-generated submission env files)
+logs/
+configs/env_*.sh
