@@ -1,8 +1,38 @@
-Where things stand (2026-11-15, late)
+Where things stand (2026-11-16)
 
-Done: E7 (matched pocket, broadened), E8 (real MD), E9 (single-cell). ALL NULL.
-The conformational-ensemble thesis has now survived every lever we had and still
-carries no transferable signal for transcriptional drug-response prediction.
+Done: E7 (matched pocket, broadened), E8 (real MD), E9 (single-cell), E10 (MD as
+an extra input to a real related-work backbone). ALL NULL. The conformational-
+ensemble thesis has now survived every lever we had and still carries no
+transferable signal for transcriptional drug-response prediction.
+
+E10 (MD in an ACTUAL related-work baseline, built 2026-11-16 on user request --
+"try adding MD in an actual baseline anyway despite all the negative results";
+they clarified: a published related-work backbone, MD integrated as the extra
+input, not our in-house ridge). Backbone = a faithful in-repo chemCPA-style
+compositional predictor (model/cpa.py, CPU torch): z = doser(logdose)*drug(ECFP)
++ cell_emb + target(vec) -> Delta; the target block is the "extra conditioning
+vector" the spec asks for (Deep dive constraint #5). We dropped E8's pocket-cover
+requirement and summarised each trajectory GLOBALLY (features/md_global.py: CA-RMSF
+distribution, Rg fluctuation, RMSD-to-mean, state count) from the frames already on
+disk -> 72/73 targets have global MD (vs E8's 20 pocket-covered; this was the one
+underpowered lever). Experiment set = 66 targets (md_global ∩ ESM ∩ static pocket),
+2581 exemplar LINCS conditions, 57 cells. Arms OFF/ESM/STATIC/MD/STATIC+MD/MD_PERM
+x {target,scaffold,cell,random} x 5 folds x 3 seeds (experiments/e10_cpa.py).
+RESULT null: verdict md_helps_over_static=false, meaningful_split_types=[].
+(STATIC+MD)-STATIC max +0.003 Delta-rho, MD-STATIC max +0.002 -- nothing clears the
+0.01 floor. MD indistinguishable from target-shuffled MD (MD-MD_PERM within noise
+every split). On held-out TARGET, OFF (no target feats at all) is the BEST arm
+(0.114) >= every conditioned arm -- the compound+cell+dose backbone already
+captures what's predictable. The only place any target feature helps is held-out
+SCAFFOLD, where STATIC-OFF +0.015* and ESM-OFF +0.014* (identity/static helps for
+novel chemistry) -- but MD adds nothing on top of static even there (MD-STATIC
+scaffold -0.009). Caveat: available MD covers a median ~23% of each protein (one
+domain) and mdCATH domains (320K, floppier) vs ATLAS chains (300K) differ in scale;
+the MD_PERM arm guards against that scale becoming spurious signal. Infra: CPU
+jobs slurm/md_global.sbatch + slurm/e10_cpa.sbatch (torch is CPU-only 2.15.0+cpu,
+no CUDA in env -- tiny MLP runs fine on CPU, ~35s/training, whole job ~1h/seed).
+Figure viz/figures.py fig_e10 (E10_accuracy.png grouped bars, E10_gaps.png forest).
+NOT committed yet (user hasn't asked).
 
 E7 (re-run on the broadened set): 282 targets, ALL protein classes (was enzyme-
 only 169), with the fpocket wrapper bug fixed (Bio.PDB PDBIO.set_structure copies

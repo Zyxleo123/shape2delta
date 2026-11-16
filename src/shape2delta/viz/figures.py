@@ -361,8 +361,50 @@ def fig_e9():
         _save(fig, "E9_singlecell_screen")
 
 
+def fig_e10():
+    r = _load("E10_cpa.json")
+    if not r:
+        return
+    plt = _style()
+    sp = ["target", "scaffold", "cell", "random"]
+    arms = ["OFF", "ESM", "STATIC", "MD", "STATIC+MD"]
+    cols = {"OFF": OI["grey"], "ESM": OI["sky"], "STATIC": OI["blue"],
+            "MD": OI["orange"], "STATIC+MD": OI["vermillion"]}
+    acc = r["accuracy"]
+
+    # Panel A — absolute Δρ per arm, grouped by split (does MD help the real predictor?)
+    fig, ax = plt.subplots(figsize=(12.5, 6.2))
+    w = 0.16
+    x = np.arange(len(sp))
+    for j, a in enumerate(arms):
+        means = [acc[a][s]["delta_pearson_mean"] for s in sp]
+        errs = [np.std(acc[a][s]["delta_pearson_folds"]) if acc[a][s]["delta_pearson_folds"] else 0 for s in sp]
+        ax.bar(x + (j - 2) * w, means, w, yerr=errs, color=cols[a], label=a,
+               capsize=3, error_kw={"elinewidth": 1.4}, zorder=3)
+    ax.set_xticks(x); ax.set_xticklabels([s.capitalize() for s in sp])
+    ax.set_ylabel("Δ-Pearson  (mean ± SD over folds)")
+    ax.set_xlabel("held-out split")
+    ax.set_title(f"E10 — MD as extra input to a chemCPA-style backbone\n"
+                 f"({r['n_targets']} MD targets · {r['n_conditions']} conditions · "
+                 f"{len(r['seeds'])} seeds)")
+    ax.legend(ncol=5, loc="upper center", bbox_to_anchor=(0.5, -0.12))
+    ax.grid(axis="x", visible=False)
+    _save(fig, "E10_accuracy")
+
+    # Panel B — the gaps that matter: does motion add over a snapshot?
+    g = r["gaps"]
+    rows = []
+    for s in sp:
+        rows.append((f"{s}  (STATIC+MD − STATIC)", g[s]["STATICMD_minus_STATIC"], OI["vermillion"]))
+    for s in sp:
+        rows.append((f"{s}  (MD − permuted MD)", g[s]["MD_minus_MDPERM"], OI["black"]))
+    tail = "MD helps over static" if r["verdict"]["md_helps_over_static"] else "motion adds nothing over static"
+    _forest(rows, f"E10 — {tail} in a real backbone",
+            "E10_gaps", floor=r["verdict"]["effect_floor"])
+
+
 ALL = {"e0": fig_e0, "e1": fig_e1, "e2": fig_e2, "e3": fig_e3, "e5": fig_e5, "e6": fig_e6,
-       "e7": fig_e7, "e8": fig_e8, "e9": fig_e9}
+       "e7": fig_e7, "e8": fig_e8, "e9": fig_e9, "e10": fig_e10}
 
 
 def build(which=None):

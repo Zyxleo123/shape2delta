@@ -51,12 +51,17 @@ Raw data is staged on scratch (`$S2D_DATA`); the repo holds only code + results.
 | **E7** | pocket-centric *matched* ablation (ligand-defined pocket; T1 = AF pocket, T2 = T1 ⊕ its motion over PDB conformers): ridge + held-out-target kNN + partial Mantel | CPU | **done — null** (282 targets, all classes; ridge T2−T1 ≤ 0; kNN −0.021 [−0.035,−0.007] = motion *hurts*; Mantel r −0.001, p 0.96) |
 | **E8** | real MD ensembles (ATLAS + mdCATH frames) as the T2 source, same pocket/T1/summariser; pure-Python .xtc decoder (RMSF r≥0.999 vs ATLAS) | CPU | **done — null** (20 targets w/ MD covering the pocket; nothing clears the 0.01 floor; MD & PDB flexibility agree but neither predicts Δ) |
 | **E9** | single-cell readout (sci-Plex3): matched pocket tiers on pseudobulk Δ **and** on single-cell distribution readouts (E-dist, responder-frac, dispersion, bimodality, viability) | CPU | **done — null** (34 targets, 2247 conditions; ridge T2−T1 ≤ 0; kNN −0.001 [−0.044,+0.040]; Mantel r −0.014; single-cell screen nothing survives BH) |
+| **E10** | MD as an *extra input* to a real related-work backbone (faithful chemCPA-style compositional predictor): global whole-protein MD vector enters as one more conditioning embedding; arms OFF/ESM/STATIC/MD/STATIC+MD/MD-permuted, same held-out splits | CPU | **done — null** (66 MD targets / 2581 cond, 3 seeds; (STATIC+MD)−STATIC max +0.003 Δρ, MD−STATIC max +0.002, both < 0.01 floor; MD ≈ permuted-MD; OFF ≥ every conditioned arm on held-out targets) |
 
 **Bottom line:** ensemble (T2) features add no transferable signal over identity/
 static here. The headline null (E1/E3/E5/E6; E2 confirms the gap exists) survives
 every lever that could have rescued it: the spec's matched pocket descriptor (E7),
-real molecular dynamics instead of PDB conformers (E8), and single-cell readout
-instead of bulk (E9) — all null. Figures in `results/figures/`. See
+real molecular dynamics instead of PDB conformers (E8), single-cell readout
+instead of bulk (E9), and — the last lever — feeding MD as an extra input to an
+*actual related-work backbone* (a chemCPA-style compositional predictor) over the
+broadest MD set we have (E10) — all null. In E10 the MD block is indistinguishable
+from a target-shuffled permutation, and the no-target backbone is as strong as any
+conditioned arm on held-out targets. Figures in `results/figures/`. See
 `results/SUMMARY.md` for the honest headline + caveats.
 
 ## Layout

@@ -93,5 +93,10 @@ _atlas: LINCS_L1000 · 2026-11-16T01:02:28.448650+00:00_
 ## E7 — Pocket-centric matched ablation  
 _atlas: LINCS_L1000 · 2026-11-16T01:04:53.308436+00:00_  
 
-**Verdict.** Matched pocket tiers (282 targets, 184 enzymes; median 11 conformers; T1 = AF pocket descriptor, T2 = T1 ⊕ its motion over experimental conformers). (a) ridge T2−T1 Δρ: target -0.004[-0.006,-0.003]*; scaffold +0.000[-0.000,+0.001]; cell +0.000[+0.000,+0.001]*; random -0.000[-0.000,-0.000]*. (b) held-out-target kNN, centred Δρ T2−T1 -0.021[-0.035,-0.007]*, T2−perm +0.002[-0.016,+0.019] (273 targets). (c) partial Mantel motion vs Δ | ESM+static r=-0.001 (p=0.964). → **null** (effect floor 0.01; * = CI excl 0).  
+**Verdict.** Matched pocket tiers (282 targets, 184 enzymes; median 11 conformers; T1 = AF pocket descriptor, T2 = T1 ⊕ its motion over experimental conformers). (a) ridge T2−T1 Δρ: target -0.004[-0.006,-0.003]*; scaffold +0.000[-0.000,+0.001]; cell +0.000[+0.000,+0.001]*; random -0.000[-0.000,-0.000]*. (b) held-out-target kNN, centred Δρ T2−T1 -0.021[-0.035,-0.007]*, T2−perm +0.002[-0.016,+0.019] (273 targets). (c) partial Mantel motion vs Δ | ESM+static r=-0.001 (p=0.964). → **null** (effect floor 0.01; * = CI excl 0).
+
+## E10 — MD as extra input to a chemCPA-style baseline  
+_atlas: LINCS_L1000 · 2026-11-16T04:49:19.534160+00:00_  
+
+**Verdict.** chemCPA-style backbone on LINCS, MD as an extra conditioning input, over 66 MD targets / 2581 conditions ({'mdcath': 48, 'atlas': 18}). Absolute Δρ (held-out target/scaffold/cell/random): OFF 0.114/0.152/0.263/0.356, STATIC+MD 0.109/0.164/0.262/0.336. (STATIC+MD)−STATIC Δρ: target +0.003[-0.005,+0.011]; scaffold -0.002[-0.008,+0.004]; cell -0.001[-0.002,+0.000]; random -0.009[-0.017,-0.000]*. MD−STATIC max +0.0021; (STATIC+MD)−STATIC max +0.0030. → **MD adds nothing over static** (floor 0.01; * = CI excl 0).  
 
